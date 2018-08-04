@@ -2,14 +2,18 @@ package com.example.jadov.guardiannews;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -22,12 +26,18 @@ import java.util.List;
 public class NewsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<News>> {
 
     // constant value for news loader ID
-    private static final int NEWS_LOADER_ID = 0;
+    private final static int NEWS_LOADER_ID = 0;
 
-    // constant URL for retrieving data from the Guardian API
-    private static final String GUARDIAN_REQUEST_URL =
-            "https://content.guardianapis.com/search?page-size=50&show-tags=contributor&q=" +
-                    "software%20engineering&api-key=ba7a5ca7-2605-46a0-8578-3ebc1536ba01";
+    // constant values for complete URL and appropriate keys
+    private final static String REQUEST_URL = BuildConfig.GUARDIAN_REQUEST_URL;
+    private final static String PAGE_SIZE = BuildConfig.PAGE_SIZE;
+    private final static String TAGS = BuildConfig.TAGS;
+    private final static String AUTHOR = BuildConfig.AUTHOR;
+    private final static String SECTION = BuildConfig.SECTION;
+    private final static String QUERY = BuildConfig.QUERY;
+    private final static String ORDER_BY = BuildConfig.ORDER_BY;
+    private final static String API_KEY = BuildConfig.API_KEY;
+    private final static String MY_API_KEY = BuildConfig.THE_GUARDIAN_API_KEY;
 
     // declare variables
     private NewsAdapter adapter;
@@ -100,8 +110,41 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<List<News>> onCreateLoader(int i, Bundle bundle) {
-        // create a new loader for the given URL
-        return new NewsLoader(this, GUARDIAN_REQUEST_URL);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // getString retrieves a String value from the preferences. The second parameter is the default value for this preference.
+        String minArticles = sharedPrefs.getString(
+                getString(R.string.settings_min_articles_key),
+                getString(R.string.settings_min_articles_default));
+
+        String section = sharedPrefs.getString(
+                getString(R.string.settings_section_key),
+                getString(R.string.settings_section_default));
+
+        String searchContent = sharedPrefs.getString(
+                getString(R.string.settings_search_content_key),
+                getString(R.string.settings_search_content_default));
+
+        String orderBy = sharedPrefs.getString(
+                getString(R.string.settings_order_by_key),
+                getString(R.string.settings_order_by_default));
+
+        // parse breaks apart the URI string that's passed into its parameter
+        Uri baseUri = Uri.parse(REQUEST_URL);
+
+        // buildUpon prepares the baseUri that we just parsed so we can add query parameters to it
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+
+        // Append query parameter and its value. For example, the `page-size=10`
+        uriBuilder.appendQueryParameter(PAGE_SIZE, minArticles);
+        uriBuilder.appendQueryParameter(TAGS, AUTHOR);
+        uriBuilder.appendQueryParameter(SECTION, section);
+        uriBuilder.appendQueryParameter(QUERY, searchContent);
+        uriBuilder.appendQueryParameter(ORDER_BY, orderBy);
+        uriBuilder.appendQueryParameter(API_KEY, MY_API_KEY);
+
+        // Return the completed uri
+        return new NewsLoader(this, uriBuilder.toString());
     }
 
     @Override
@@ -126,4 +169,22 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
         adapter.clear();
     }
 
+    @Override
+    // This method initialize the contents of the Activity's options menu.
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the Options Menu we specified in XML
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

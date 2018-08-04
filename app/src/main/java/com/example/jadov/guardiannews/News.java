@@ -3,43 +3,43 @@ package com.example.jadov.guardiannews;
 public class News {
 
     // declare variables
-    private String section;
-    private String date;
-    private String title;
-    private String author;
-    private String url;
+    private String mSection;
+    private String mDate;
+    private String mTitle;
+    private String mAuthor;
+    private String mUrl;
 
     // default constructor for creating an news object
-    public News(String section, String date, String title, String author, String url) {
-        this.section = section;
-        this.date = date;
-        this.title = title;
-        this.author = author;
-        this.url = url;
+    public News(String mSection, String mDate, String mTitle, String mAuthor, String mUrl) {
+        this.mSection = mSection;
+        this.mDate = mDate;
+        this.mTitle = mTitle;
+        this.mAuthor = mAuthor;
+        this.mUrl = mUrl;
     }
 
     // retrieves the section of a news article
     public String getSection() {
-        return section;
+        return mSection;
     }
 
     // retrieves the publication date of a news article
     public String getDate() {
-        return date;
+        return mDate;
     }
 
     // retrieves the title of a news article
     public String getTitle() {
-        return title;
+        return mTitle;
     }
 
     // retrieves the author(s) of a news article
     public String getAuthor() {
-        return author;
+        return mAuthor;
     }
 
     // retrieves the URL or a news article
     public String getUrl() {
-        return url;
+        return mUrl;
     }
 }

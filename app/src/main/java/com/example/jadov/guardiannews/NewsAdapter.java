@@ -3,6 +3,7 @@ package com.example.jadov.guardiannews;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,26 +24,45 @@ public class NewsAdapter extends ArrayAdapter<News> {
 
     @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    public View getView(int position, View convertView, @Nullable ViewGroup parent) {
 
-        if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.news_item, parent, false);
+        final ViewHolder holder;
+
+        try {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.news_item, parent, false);
+                holder = new ViewHolder(convertView);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            if (position < getCount()) {
+                News currentNews = getItem(position);
+
+                holder.sectionTextView.setText(currentNews.getSection());
+                holder.titleTextView.setText(currentNews.getTitle());
+                holder.dateTextView.setText(formatDate(currentNews.getDate()));
+                holder.authorTextView.setText(currentNews.getAuthor());
+            }
+        } catch (NullPointerException npe) {
+            Log.e("NewsAdapter", "getSection() throws npe", npe);
         }
-        News currentNews = getItem(position);
-
-        TextView sectionTextView = convertView.findViewById(R.id.news_section);
-        sectionTextView.setText(currentNews.getSection());
-
-        TextView titleTextView = convertView.findViewById(R.id.news_title);
-        titleTextView.setText(currentNews.getTitle());
-
-        TextView dateTextView = convertView.findViewById(R.id.news_pub_date);
-        dateTextView.setText(formatDate(currentNews.getDate()));
-
-        TextView authorTextView = convertView.findViewById(R.id.news_author);
-        authorTextView.setText(currentNews.getAuthor());
-
         return convertView;
+    }
+
+    // Create ViewHolder to increase loading efficiency
+    static class ViewHolder {
+        private TextView sectionTextView;
+        private TextView titleTextView;
+        private TextView dateTextView;
+        private TextView authorTextView;
+
+        ViewHolder(View view) {
+            sectionTextView = view.findViewById(R.id.news_section);
+            titleTextView = view.findViewById(R.id.news_title);
+            dateTextView = view.findViewById(R.id.news_pub_date);
+            authorTextView = view.findViewById(R.id.news_author);
+        }
     }
 
     /* returns the formatted date string from a Date object in

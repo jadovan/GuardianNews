@@ -11,7 +11,8 @@
     android:paddingLeft="@dimen/default_padding"
     android:paddingRight="@dimen/default_padding"
     android:paddingStart="@dimen/default_padding"
-    android:paddingTop="@dimen/small_padding">
+    android:paddingTop="@dimen/small_padding"
+    android:id="@+id/news_list">
 
     <LinearLayout
         android:layout_width="wrap_content"

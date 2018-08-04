@@ -21,6 +21,12 @@ import java.util.List;
 public class QueryUtils {
 
     private static final String LOG_TAG = NewsActivity.class.getName();
+    private static final int ZERO_INDEX = 0;
+    private static final int ONE_INDEX = 1;
+    private static final int THREE_INDEX = 3;
+    private static final int MAX_READ_TIMEOUT = 10000;
+    private static final int MAX_CONNECT_TIMEOUT = 15000;
+
 
     private QueryUtils() {
     }
@@ -48,7 +54,7 @@ public class QueryUtils {
             JSONArray newsArray = response.getJSONArray("results");
 
             // for each news article in the newsArray, create an {@link News} object
-            for (int i = 0; i < newsArray.length(); i++) {
+            for (int i = ZERO_INDEX; i < newsArray.length(); i++) {
 
                 // get a single news article at position i within the list of news
                 JSONObject currentNews = newsArray.getJSONObject(i);
@@ -73,20 +79,20 @@ public class QueryUtils {
 
                 // determine if the authorArray is not null and length is greater than 0 in order
                 // to display a list of author(s)
-                if (authorArray != null && authorArray.length() > 0) {
+                if (authorArray != null && authorArray.length() > ZERO_INDEX) {
 
                     // for each author list them accordingly
-                    for (int j = 0; j < authorArray.length(); j++) {
+                    for (int j = ZERO_INDEX; j < authorArray.length(); j++) {
 
                         // get a single author at position j within the list of author(s)
                         JSONObject authors = authorArray.getJSONObject(j);
 
                         // extract the value associated with the key called "webTitle"
-                        String authorsListed = authors.getString("webTitle");
+                        String authorsListed = authors.optString("webTitle");
 
                         // if the authorArray is not null and length is greater than 1, then
                         // list all authors separated by tabs
-                        if (authorArray != null && authorArray.length() > 1) {
+                        if (authorArray.length() > ONE_INDEX) {
                             author.append(authorsListed);
                             author.append("\t\t\t");
 
@@ -97,7 +103,7 @@ public class QueryUtils {
                     }
                     // if there are no authors within the authorsArray, then state "No author(s) listed"
                 } else {
-                    author.replace(0, 3, "No author(s) listed");
+                    author.replace(ZERO_INDEX, THREE_INDEX, "No author(s) listed");
                 }
 
                 // create a new {@link News} object with the information from the JSON response
@@ -143,14 +149,14 @@ public class QueryUtils {
         InputStream inputStream = null;
         try {
             urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(10000 /* milliseconds */);
-            urlConnection.setConnectTimeout(15000 /* milliseconds */);
+            urlConnection.setReadTimeout(MAX_READ_TIMEOUT);
+            urlConnection.setConnectTimeout(MAX_CONNECT_TIMEOUT);
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
             // If the request was successful (response code 200),
             // then read the input stream and parse the response.
-            if (urlConnection.getResponseCode() == 200) {
+            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 inputStream = urlConnection.getInputStream();
                 jsonResponse = readFromStream(inputStream);
             } else {
